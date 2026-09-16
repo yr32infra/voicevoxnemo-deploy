@@ -1,0 +1,62 @@
+version: '3.9'
+services:
+  voicevoxnemo:
+    image: voicevox/voicevox_nemo_engine:nvidia-latest@sha256:e30a8da58299075d361f3c61178d1ba2123c8d7d97a3082b899e5cdf63ea9070
+    hostname: voicevoxnemo
+    container_name: voicevoxnemo__voicevoxnemo
+    restart: unless-stopped
+
+    networks:
+      - default
+
+    deploy:
+      resources:
+        limits:
+          memory: 16g
+        reservations:
+          devices:
+            - driver: nvidia
+              # Fix for docker-ce 27.3.x bugs.
+              # refs:
+              #   https://x.com/yanorei32/status/1840455188928405554
+              #   https://github.com/moby/moby/pull/48483
+              #   https://docs.docker.com/compose/how-tos/gpu-support/
+              count: all
+              capabilities: [gpu]
+
+  cloudflared:
+    image: cloudflare/cloudflared:2026.9.1-amd64@sha256:d68fa057087c359c79a255570e891215877ce48aa48ba6f28aac90d8077acbc3
+    hostname: cloudflared
+    container_name: voicevoxnemo__cloudflared
+    restart: unless-stopped
+
+    environment:
+      TUNNEL_METRICS: 0.0.0.0:9126
+      TUNNEL_LOGFILE: /dev/stdout
+
+    command: tunnel run --token ${TUNNEL_TOKEN}
+    user: root
+
+    networks:
+      default:
+      outband:
+      prometheus__cloudflared:
+        aliases:
+          - voicevoxnemo__cloudflared
+
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+
+networks:
+  prometheus__cloudflared:
+    name: prometheus__cloudflared
+    external: true
+
+  default:
+    name: voicevoxnemo__default
+    internal: true
+
+  outband:
+    name: voicevoxnemo__outband
