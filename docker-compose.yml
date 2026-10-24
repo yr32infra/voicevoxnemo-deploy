@@ -1,7 +1,7 @@
 version: '3.9'
 services:
   voicevoxnemo:
-    image: voicevox/voicevox_nemo_engine:nvidia-latest@sha256:e30a8da58299075d361f3c61178d1ba2123c8d7d97a3082b899e5cdf63ea9070
+    image: voicevox/voicevox_nemo_engine:nvidia-latest@sha256:557d865bc730f21fbb3b3ef9eacbde46614419fb4c44cb375b77b60aa7ca8c9d
     hostname: voicevoxnemo
     container_name: voicevoxnemo__voicevoxnemo
     restart: unless-stopped
